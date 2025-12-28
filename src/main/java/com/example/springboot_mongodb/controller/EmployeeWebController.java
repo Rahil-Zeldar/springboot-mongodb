@@ -4,7 +4,6 @@ import com.example.springboot_mongodb.entity.Employee;
 import com.example.springboot_mongodb.entity.Projects;
 import com.example.springboot_mongodb.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.Banner;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
