@@ -20,3 +20,8 @@ for managing employees, departments, and projects.
 - Thymeleaf
 - Bootstrap 5
 - Java 21
+
+## Run the project
+
+docker compose up --build
+
