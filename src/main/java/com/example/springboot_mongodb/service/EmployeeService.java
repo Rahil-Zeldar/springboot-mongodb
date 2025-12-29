@@ -5,6 +5,7 @@ import com.example.springboot_mongodb.repo.EmployeeRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +20,8 @@ public class EmployeeService {
     }
 
     public List<Employee> getAllEmployees(){
-        return employeeRepo.findAll();
+        List<Employee>  list = employeeRepo.findAll();
+        return list == null ? new ArrayList<>() : list;
     }
 
     public Optional<Employee> getEmployeeById(String id){

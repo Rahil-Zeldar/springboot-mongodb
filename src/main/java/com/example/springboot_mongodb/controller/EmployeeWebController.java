@@ -1,5 +1,6 @@
 package com.example.springboot_mongodb.controller;
 
+import com.example.springboot_mongodb.entity.Department;
 import com.example.springboot_mongodb.entity.Employee;
 import com.example.springboot_mongodb.entity.Projects;
 import com.example.springboot_mongodb.service.EmployeeService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,48 +17,66 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/employee")
+@RequestMapping("/employees")
 public class EmployeeWebController {
 
     @Autowired
     private EmployeeService employeeService;
 
     @GetMapping
-    public String listEmployee(Model model) {
+    public String listEmployee(Model model,@ModelAttribute("successMessage") String successMessage,
+                               @ModelAttribute("errorMessage") String errorMessage) {
         model.addAttribute("employees", employeeService.getAllEmployees());
-        return "employee";
+        model.addAttribute("successMessage",successMessage);
+        model.addAttribute("errorMessage",errorMessage);
+        return "employees";
     }
 
+    @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("employee", new Employee());
-        model.addAttribute("projectNameString", "");
-        model.addAttribute("projectAllocationsString", "");
+        Employee employee = new Employee();
+        employee.setDepartment(new Department());
+        model.addAttribute("employee", employee);
+        model.addAttribute("formAction", "/employees");
 
+    /*    model.addAttribute("projectNameString", "");
+        model.addAttribute("projectAllocationsString", "");
+    */
         return "employee-form";
     }
 
     @PostMapping
     public String createEmployee(@ModelAttribute Employee employee,
                                  @RequestParam(value = "projectNames", required = false) String projectNames,
-                                 @RequestParam(value = "projectAllocations", required = false) String projectAllocations) {
+                                 @RequestParam(value = "projectAllocations", required = false) String projectAllocations,
+                                 RedirectAttributes redirectAttributes) {
 
         populateProjectsFormInputs(employee, projectNames, projectAllocations);
-        employeeService.createEmployee(employee);
+        try{
+            employeeService.createEmployee(employee);
+            redirectAttributes.addFlashAttribute("successMessage","Employee created Successfully!!!");
+        } catch (Exception e){
+            redirectAttributes.addFlashAttribute("errorMessage","Failed to create Employee" + e.getMessage());
+        }
 
         return "redirect:/employees";
     }
 
     @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable String id, Model model) {
+    public String showEditForm(@PathVariable String id, Model model,RedirectAttributes redirectAttributes) {
         Optional<Employee> optionalEmployee = employeeService.getEmployeeById(id);
         if (optionalEmployee.isPresent()) {
             Employee employee = optionalEmployee.get();
             model.addAttribute("employee", employee);
+            model.addAttribute("employee", employee);
+            model.addAttribute("formAction", "/employees/update/" + id);
             model.addAttribute("projectNamesString", joinProjectNames(employee.getProjects()));
             model.addAttribute("projectAllocationString", joinProjectAllocations(employee.getProjects()));
 
             return "employee-form";
         } else {
+            redirectAttributes.addFlashAttribute("errorMessage","Employee not found with ID" + id);
             return "redirect:/employees";
         }
     }
@@ -65,18 +85,30 @@ public class EmployeeWebController {
     public String updateEmployee(@PathVariable String id,
                                  @ModelAttribute Employee employee,
                                  @RequestParam(value = "projectNames", required = false) String projectNames,
-                                 @RequestParam(value = "projectAllocations", required = false) String projectAllocations) {
+                                 @RequestParam(value = "projectAllocations", required = false) String projectAllocations,
+                                 RedirectAttributes redirectAttributes) {
 
         populateProjectsFormInputs(employee, projectNames, projectAllocations);
-        employeeService.updateEmployee(id,employee);
+        try{
+            employeeService.updateEmployee(id,employee);
+            redirectAttributes.addFlashAttribute("successMessage","Employee updated Successfully!!!");
+        } catch (Exception e){
+            redirectAttributes.addFlashAttribute("errorMessage","Failed to update Employee!!" + e.getMessage());
+        }
+
+
 
         return "redirect:/employees";
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteEmployee(@PathVariable String id){
-        employeeService.deleteEmployee(id);
-
+    public String deleteEmployee(@PathVariable String id,RedirectAttributes redirectAttributes){
+        try{
+            employeeService.deleteEmployee(id);
+            redirectAttributes.addFlashAttribute("successMessage","Employee deleted Successfully!!!");
+        } catch (Exception e){
+            redirectAttributes.addFlashAttribute("errorMessage","Employee deleted Successfully!!!");
+        }
         return "redirect:/employees";
     }
 

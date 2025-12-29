@@ -14,12 +14,13 @@
     </div>
 
     <!-- Flash message -->
-    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null and !#strings.isEmpty(successMessage)}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage != null and !#strings.isEmpty(errorMessage)}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
     <!-- Employee table -->
     <div class="table-responsive shadow-sm bg-white rounded">
-        <table class="table table-striped table-hover mb-8">
+        <table class="table table-striped table-hover mb-8"
+            th:if="${employees != null and !employees.isEmpty()}">
             <thead class="table-dark">
             <tr>
                 <th>Name</th>
